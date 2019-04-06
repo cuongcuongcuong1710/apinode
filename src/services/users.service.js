@@ -4,97 +4,43 @@ import { NotFoundError, BadReqError } from '../middleWares/errors';
 import jwt from 'jsonwebtoken';
 import fs from 'fs';
 import joi from 'joi';
+import * as constants from '../commons/constants';
 const privateKey = fs.readFileSync('./src/commons/secretKey.txt');
 
 export async function getAllUser(req, res, next){
+
   try {
-    const user = await models.User.findAndCountAll();
-    if(!user){
-      throw new NotFoundError('User');
+    const users = await models.User.findAndCountAll();
+    if(!users){
+      throw new NotFoundError('Users');
     }
-    res.send(user);
+    //const object = JSON.parse(users);
+    res.send(users);
   } catch (error) {
     res.send(error);
   }
 }
 
-// export async function createUser(req, res, next){
-//   const {firstName, email, userName, passWord} = req.body;
-//   const hashPassword = bcrypt.hashSync(passWord, 10);
-//   try {
-//     const user = await models.User.create({
-//       firstName: firstName,
-//       email: email,
-//       userName: userName,
-//       passWord: hashPassword
-//     })
-//     res.send(user);
-//   } catch (error) {
-//     next(error);
-//   }
-// }
-
 export async function createUser(req, res, next){
+
+  const object = res.locals.object;
   try {
-    const schema = joi.object().keys({
-      firstName: joi.string().min(3).max(30).required(),
-      email: joi.string().email(),
-      userName: joi.string(),
-      passWord: joi.string()
-    })
-    const { value, err} = joi.validate(req.body, schema);
-    res.send(value);
-    const hashPassword = bcrypt.hashSync(value.passWord, 10);
-    if(err){
-      throw new BadReqError();
-    }
-    const user = await models.User.create({
-      firstName: value.firstName,
-      email: value.email,
-      userName: value.userName,
-      passWord: hashPassword
-    })
-    res.send(user);
+        const hashPassword = await bcrypt.hashSync(object.passWord, 10);
+        const user = await models.User.create({
+          firstName: object.firstName,
+          email: object.email,
+          userName: object.userName,
+          passWord: hashPassword
+        })
+        res.send(user);
   } catch (error) {
+    
     next(error);
   }
 }
-  
-
-
-
-// export async function createUser(req, res, next){
-//   //const {firstName, email, userName, passWord} = req.body;
-//   const data = req.body;
-//   const schema = Joi.object().keys({
-//     firstName: Joi.string(),
-//     email: Joi.string().email().required(),
-//     userName: Joi.string().alphanum().min(6).max(16).required(),
-//     //birthday: Joi.date().max('1-1-2004').iso(),
-//     passWord: Joi.string().regex(/^[a-zA-Z0-9]{6,16}$/).min(6).required()
-//   });
-
-//   Joi.validate(data, schema,async (err, value) => {
-//     if (err) {
-//         throw new BadReqError();
-//     } else {
-//        try {
-//          const hashPassword = bcrypt.hashSync(value.passWord, 10);
-//       const user = await models.User.create({
-//         firstName: value.firstName,
-//         email: value.email,
-//         userName: value.userName,
-//         passWord: hashPassword
-//       })
-//       res.send(user);
-//        } catch (error) {
-//          next(error);
-//        }
-//     }
-//   });
-// }
 
 export async function login(req, res, next){
+
   const {userName, passWord} = req.body;
   try {
     const user = await models.User.findOne({
@@ -117,12 +63,35 @@ export async function login(req, res, next){
   }
 }
 
-export async function updateUser(req, res, next){
-  //const {userId} = res.locals.user;
-  const userID = req.params.id;
-  const {firstName, email, userName, passWord} = req.body;
-  const hashPassword = bcrypt.hashSync(passWord, 10);
+export async function getUserByID(req, res, next){
 
+  const userID = req.params.id;
+  try {
+    const user = await models.User.findOne({
+      where:{
+        id: userID
+      }
+    });
+    if(!user){
+        throw new NotFoundError(`user ID: ${userID}`);
+    }
+    const userResponse = {
+    id: user.id,
+    firstName: user.firstName,
+    email: user.email,
+    userName: user.userName,
+    image: `${constants.apiHost}${constants.apiPath}/${user.userImage}`
+    }
+    res.send(userResponse);
+  } catch (e) {
+    next(e);
+  }
+}
+
+export async function updateUser(req, res, next){
+
+  const userID = req.params.id;
+  const object = res.locals.object;
   try {
     const user = await models.User.findOne({
       where:{
@@ -131,17 +100,22 @@ export async function updateUser(req, res, next){
     });
     if(!user){
       throw new NotFoundError(`user ID: ${userID}`);
-  }
-    const newUser = await user.update({
-      firstName,email,userName,passWord: hashPassword
-    });
-    res.send(newUser);
+    }
+      const hashPassword = bcrypt.hashSync(object.passWord, 10);
+      const newUser = await user.update({
+        firstName: object.firstName,
+        email: object.email,
+        userName: object.userName,
+        passWord: hashPassword
+      })
+      res.send(newUser);
   } catch (error) {
     next(error);
   }
 }
 
 export async function deleteUser(req, res, next){
+
   const userId = req.params.id;
   try {
     const user = await models.User.findOne({

@@ -4,6 +4,7 @@ import { UnauthorizedError } from './errors';
 const privateKey = fs.readFileSync('./src/commons/secretKey.txt');
 
 export const verifyJWT = (req, res, next) => {
+  
   const token = req.headers['authorization'];
   jwt.verify(token, privateKey, (err, decoded) => {
   if(err) {

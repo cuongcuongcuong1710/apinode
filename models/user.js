@@ -1,5 +1,4 @@
 'use strict';
-import Joi from 'joi';
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define('User', {
     // firstName: {
@@ -47,6 +46,33 @@ module.exports = (sequelize, DataTypes) => {
     //       }
     //   }
     // },
+
+
+
+    // firstName: {
+    //   type: DataTypes.STRING,
+    //   allowNull: false,
+    // },
+    // email: {
+    //   type: DataTypes.STRING,
+    //   allowNull: false,
+    //   validate: {
+    //     isEmail: true
+    //   }
+    // },
+    // userName: {
+    //   type: DataTypes.STRING,
+    //   allowNull: false,
+    //   validate: {
+    //     len: [4,30]
+    //   }
+    // },
+    // passWord: {
+    //   type: DataTypes.STRING,
+    //   allowNull: false
+    // },
+    // userImage: DataTypes.STRING
+
     firstName: DataTypes.STRING,
     email: DataTypes.STRING,
     userName: DataTypes.STRING,
