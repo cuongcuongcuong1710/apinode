@@ -79,8 +79,8 @@ module.exports = (sequelize, DataTypes) => {
     passWord: DataTypes.STRING,
     userImage: DataTypes.STRING
   }, {});
-  User.associate = function(models) {
+  User.associate = function (models) {
     // associations can be defined here
   };
-return User;
+  return User;
 };

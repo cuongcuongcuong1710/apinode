@@ -14,7 +14,7 @@ router.post('/login', login);
 
 router.get('/:id', verifyJWT, getUserByID);
 
-router.put('/:id',verifyJWT, validateRequest, updateUser);
+router.put('/:id', verifyJWT, validateRequest, updateUser);
 
 router.delete('/:id', verifyJWT, deleteUser);
 
