@@ -55,7 +55,7 @@ export async function login(req, res, next) {
     if (kq === false) {
       throw new NotFoundError('Username And Password');
     }
-    const token = jwt.sign({ userId: user.id, userName: user.userName }, privateKey, { expiresIn: '1h' });
+    const token = jwt.sign({ userId: user.id, userName: user.userName }, privateKey, { expiresIn: '10h' });
     res.send(token);
   }
   catch (error) {
@@ -126,11 +126,7 @@ export async function deleteUser(req, res, next) {
     if (!user) {
       throw new NotFoundError(`user ID: ${userId}`);
     }
-    models.User.destroy({
-      where: {
-        id: userId
-      }
-    });
+    user.destroy();
     res.send('Đã xóa');
   } catch (error) {
     next(error);
